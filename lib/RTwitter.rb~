@@ -214,7 +214,7 @@ module RTwitter
         end
 
         def url(endpoint)
-            if /^https:/ =~ endpoint 
+            if /https:\/\// =~ endpoint 
                 return endpoint 
             end
             list = {
