@@ -1,29 +1,37 @@
 # RTwitter
 
-TODO: Write a gem description
+You can use REST and **Streaming** API.
 
-## Installation
+## How to use ?
 
-Add this line to your application's Gemfile:
++ Require   
+`require'RTwitter'`
 
-    gem 'RTwitter'
++ New Instance  
+If you have access\_token and access\_token\_secret  
+`rt = RTwitter.new(ck,cks,at,ats)`  
+If you don't have...  
+`rt = RTwitter.new(ck,cks)`  
+`puts rt.request_token`  
+`rt.access_token(pin)`  
 
-And then execute:
++ POST request  
+`result = rt.post(endpoint,{parameter => value})`  
+example...  
+`endpoint = 'statuses/update'`  
+`parameter = 'status'`  
+`value = 'Hello World!'`  
 
-    $ bundle
++ GET request  
+`result = rt.get(endpoint,{parameter => value})`  
+example...  
+`endpoint = 'users/show'`  
+`parameter = 'screen_name'`  
+`value = 'CIA'`  
 
-Or install it yourself as:
-
-    $ gem install RTwitter
-
-## Usage
-
-TODO: Write usage instructions here
-
-## Contributing
-
-1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
++ Streaming  
+`rt.streaming(endpoint,{parameter => value}){|status| p status }`  
+example...  
+`endpoint = 'statuses/filter'`  
+`parameter = 'track'`  
+`value = 'Hello'` 
