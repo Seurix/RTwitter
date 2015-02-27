@@ -9,8 +9,7 @@ require'net/http'
 module RTwitter
 	class OAuth
 
-		attr_reader :consumer_key,:consumer_key_secret,:access_token,:access_token_secret,:user_id,:screen_name
-		attr_accessor :userAgent
+		attr_accessor :consumer_key,:consumer_key_secret,:access_token,:access_token_secret,:user_id,:screen_name,:userAgent
 		def initialize(ck ,cks ,at = nil ,ats = nil)
 			@consumer_key = ck
 			@consumer_key_secret = cks
