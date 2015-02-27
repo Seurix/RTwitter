@@ -18,12 +18,13 @@ module RTwitter
 			@access_token_secret = ats
 			@userAgent = 'RTwitter'
 		end
-		def request_token
+		def request_token(callback)
 
 			oauth_params = oauth
 			oauth_params.delete('oauth_token')
-			oauth_params['oauth_callback'] = 'oob'
+			oauth_params['oauth_callback'] = callback
 			base_params = Hash[oauth_params.sort]
+p base_params
 			query = build_query(base_params)
 			url = 'https://api.twitter.com/oauth/request_token'
 			base = 'POST&' + escape(url) + '&' + escape(query)
@@ -31,7 +32,7 @@ module RTwitter
 			oauth_params['oauth_signature'] = Base64.encode64(OpenSSL::HMAC.digest("sha1",key, base)).chomp
 			header = {'Authorization' => 'OAuth ' + build_header(oauth_params),'User-Agent' => @userAgent}
 			response = post_request(url,'',header)
-
+p response.body
 			items = response.body.split('&')
 			@request_token = items[0].split('=')[1]
 			@request_token_secret = items[1].split('=')[1]
