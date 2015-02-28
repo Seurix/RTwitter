@@ -30,10 +30,14 @@ module RTwitter
 			oauth_params['oauth_signature'] = Base64.encode64(OpenSSL::HMAC.digest("sha1",key, base)).chomp
 			header = {'Authorization' => 'OAuth ' + build_header(oauth_params),'User-Agent' => @userAgent}
 			response = post_request(url,'',header)
-			items = response.body.split('&')
-			@request_token = items[0].split('=')[1]
-			@request_token_secret = items[1].split('=')[1]
-			return [@request_token,@request_token_secret]
+			begin
+				items = response.body.split('&')
+				@request_token = items[0].split('=')[1]
+				@request_token_secret = items[1].split('=')[1]
+				return [@request_token,@request_token_secret]
+			rescue
+				raise RTwitterException,response.body
+			end
 
 		end
 
@@ -52,14 +56,17 @@ module RTwitter
 			header = {'Authorization' => 'OAuth ' + build_header(oauth_params),'User-Agent' => @userAgent}
 			body = ''
 			response = post_request(url,body,header)
+			begin
+				access_tokens = response.body.split('&')
+				@access_token = access_tokens[0].split('=')[1]
+				@access_token_secret = access_tokens[1].split('=')[1]
+				@user_id = access_tokens[2].split('=')[1]
+				@screen_name = access_tokens[3].split('=')[1]
 
-			access_tokens = response.body.split('&')
-			@access_token = access_tokens[0].split('=')[1]
-			@access_token_secret = access_tokens[1].split('=')[1]
-			@user_id = access_tokens[2].split('=')[1]
-			@screen_name = access_tokens[3].split('=')[1]
-
-			return [@access_token,@access_token_secret,@user_id,@screen_name]
+				return [@access_token,@access_token_secret,@user_id,@screen_name]
+			rescue
+				raise RTwitterException,response.body
+			end
 		end
 
 
