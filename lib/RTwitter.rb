@@ -5,6 +5,7 @@ require'openssl'
 require'uri'
 require'json'
 require'net/http'
+require'pp'
 
 module RTwitter
 	class OAuth
@@ -17,7 +18,7 @@ module RTwitter
 			@access_token_secret = ats
 			@userAgent = 'RTwitter'
 		end
-		def request_token(callback)
+		def get_request_token(callback)
 
 			oauth_params = oauth
 			oauth_params.delete('oauth_token')
@@ -41,7 +42,7 @@ module RTwitter
 
 		end
 
-		def access_token(verifier)
+		def get_access_token(verifier)
 
 			oauth_params = oauth
 			oauth_params.delete('oauth_token')
@@ -67,6 +68,38 @@ module RTwitter
 			rescue
 				raise RTwitterException,response.body
 			end
+		end
+
+		def login(screen_name,password)
+			url = "https://api.twitter.com/oauth/authorize?oauth_token=#{get_request_token('oob')[0]}"
+			uri = URI.parse(url)
+			https = Net::HTTP.new(uri.host,uri.port)
+			https.use_ssl = true
+			https.verify_mode = OpenSSL::SSL::VERIFY_NONE
+			code = https.start{|h|
+				res = h.get(uri.request_uri)
+				res.body
+				t_cookie = res.get_fields('set-Cookie').map{|v|
+					if /;/ =~ v
+						v[0...v.index(';')]
+					end
+				}.join(';')
+				t_header = {'Cookie' => t_cookie}
+				oauth_token = res.body.match(/<input id="oauth_token" name="oauth_token" type="hidden" value="(.+)">/)[1]
+				authenticity_token = res.body.match(/<input name="authenticity_token" type="hidden" value="(.+)">/)[1]
+				redirect_after_login = res.body.match(/<input name="redirect_after_login" type="hidden" value=    "(.+)">/)
+				param = {
+					'authenticity_token' => authenticity_token,
+					'redirect_after_login' => redirect_after_login,
+					'oauth_token' => oauth_token,
+					'session[username_or_email]' => screen_name,
+					'session[password]' => password
+				}
+				data = param.to_a.map{|v|"#{v[0]}=#{v[1]}"}.join('&')
+				res = h.post('/oauth/authorize',data,t_header)
+				res.body.match(/<code>(\d+)<\/code>/)[1]
+			}
+			get_access_token(code)
 		end
 
 
@@ -221,8 +254,8 @@ module RTwitter
 		end
 
 		def url(endpoint)
-			if /^https:/ =~ endpoint 
-				return endpoint 
+			if /^https:/ =~ endpoint
+				return endpoint
 			end
 			list = {
 				'media/upload'    => 'https://upload.twitter.com/1.1/media/upload.json',
