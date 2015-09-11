@@ -213,7 +213,6 @@ module RTwitter
 			end
 			req = Net::HTTP::Post.new(uri.request_uri + '?' + body,header)
 			https.request(req){|response|
-				puts "content-length: #{response.content_length}"
 				response.read_body{|chunk|
 					yield chunk
 				}
